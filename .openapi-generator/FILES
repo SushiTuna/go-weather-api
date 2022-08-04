@@ -1,0 +1,13 @@
+Dockerfile
+api/openapi.yaml
+go/README.md
+go/api_location.go
+go/api_weather.go
+go/model_api_response.go
+go/model_get_weather_by_location_200_response.go
+go/model_get_weather_by_location_200_response_all_of.go
+go/model_location.go
+go/model_pagination.go
+go/model_weather.go
+go/routers.go
+main.go

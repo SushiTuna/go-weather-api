@@ -1,0 +1,273 @@
+openapi: 3.0.0
+info:
+  description: Aggregator API for collecting weather info of a location.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: Weather Aggregator API
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- description: Collected weather information
+  name: weather
+- description: GPS location of the weather information
+  name: location
+paths:
+  /location/{locationId}/weather:
+    get:
+      description: Get the weather information from the given Location.
+      operationId: getWeatherByLocation
+      parameters:
+      - description: ID of the location
+        explode: false
+        in: path
+        name: locationId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: perPage
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getWeatherByLocation_200_response'
+          description: Success
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: No Record Found
+      summary: Get weather information from location
+      tags:
+      - weather
+  /location:
+    post:
+      description: Add new location
+      operationId: insertLocation
+      requestBody:
+        $ref: '#/components/requestBodies/Location'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Bad Request
+      summary: Add location
+      tags:
+      - location
+  /location/{locationId}:
+    delete:
+      description: Delete location information
+      operationId: deleteLocationById
+      parameters:
+      - description: ID of location
+        explode: false
+        in: path
+        name: locationId
+        required: true
+        schema:
+          format: int64
+          type: number
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Location'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+          description: Successful
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Record Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Unprocessable Record
+      summary: Delete location
+      tags:
+      - location
+    put:
+      description: Update location information
+      operationId: updateLocationById
+      parameters:
+      - description: ID of location
+        explode: false
+        in: path
+        name: locationId
+        required: true
+        schema:
+          format: int64
+          type: number
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Location'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+          description: Successful
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+          description: Record Not Found
+      summary: Update location
+      tags:
+      - location
+components:
+  requestBodies:
+    Weather:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Weather'
+    Location:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Location'
+  schemas:
+    Weather:
+      description: Collected weather information
+      properties:
+        id:
+          format: int64
+          type: integer
+        airTemperature:
+          format: float
+          type: number
+        humidity:
+          format: float
+          type: number
+        precipitation:
+          format: float
+          type: number
+        eventDateTime:
+          format: date-time
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+      required:
+      - location
+      title: Weather Information
+      type: object
+    Location:
+      description: Record of the specified landmark or location
+      example:
+        latitude: latitude
+        name: name
+        description: description
+        id: 0
+        longitude: longitude
+      properties:
+        id:
+          format: int64
+          type: integer
+        longitude:
+          type: string
+        latitude:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - latitude
+      - longitude
+      - name
+      title: GPS Location
+      type: object
+    ApiResponse:
+      description: Return the status response for a request or event
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      title: Server response for an event or request
+      type: object
+    Pagination:
+      description: Pagination of long array
+      properties:
+        total:
+          type: number
+        page:
+          type: number
+        perPage:
+          type: number
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+        results:
+          items: {}
+          type: array
+      title: Record Pagination
+      type: object
+    getWeatherByLocation_200_response_allOf:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/Weather'
+          type: array
+      type: object
+    getWeatherByLocation_200_response:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - $ref: '#/components/schemas/getWeatherByLocation_200_response_allOf'
